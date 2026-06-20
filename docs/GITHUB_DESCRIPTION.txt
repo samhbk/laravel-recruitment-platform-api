@@ -1,0 +1,1 @@
+Laravel recruitment platform API with authentication, RBAC, job listings, applications, Redis caching, OpenAPI docs, tests, Docker, and CI.

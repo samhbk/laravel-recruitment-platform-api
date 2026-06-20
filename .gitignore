@@ -1,0 +1,42 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment & secrets — never commit
+.env
+.env.*
+!.env.example
+.auth.json
+auth.json
+
+# PHP / Laravel
+/vendor/
+/node_modules/
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/storage/logs/*
+!/storage/logs/.gitignore
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# PHPUnit & tooling
+.phpunit.result.cache
+.phpunit.cache
+.phpactor.json
+
+# IDE
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Homestead
+Homestead.json
+Homestead.yaml
+
+# Logs (root-level)
+*.log

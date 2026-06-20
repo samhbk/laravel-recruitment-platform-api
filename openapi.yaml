@@ -1,0 +1,396 @@
+openapi: 3.0.3
+info:
+  title: Recruitment Platform API (Reference)
+  description: |
+    Public reference Laravel API: JWT, RBAC (admin, company, job_seeker), job listings with Redis-backed list cache,
+    applications and ATS-style status updates, employer/candidate profiles, saved jobs, recommendations, salary analytics,
+    and queued notifications. No real tenant data — demo seeds only.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  security:
+    - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, password_confirmation]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                password_confirmation: { type: string }
+                role: { type: string, enum: [job_seeker, company], description: Defaults to job_seeker }
+      responses:
+        '201':
+          description: User registered and token returned
+  /auth/login:
+    post:
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Returns access_token, token_type, expires_in
+        '401':
+          description: Unauthorized
+  /auth/me:
+    get:
+      summary: Get current user (authenticated)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Current user
+  /auth/logout:
+    post:
+      summary: Logout (authenticated)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Successfully logged out
+  /auth/refresh:
+    post:
+      summary: Refresh JWT token (authenticated)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: New token
+  /job-listings:
+    get:
+      summary: List published job listings (public)
+      parameters:
+        - name: employment_type
+          in: query
+          schema: { type: string, enum: [full_time, part_time, contract, remote] }
+        - name: location
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: salary_min
+          in: query
+          schema: { type: number }
+        - name: salary_max
+          in: query
+          schema: { type: number }
+      responses:
+        '200':
+          description: Paginated list of job listings
+    post:
+      summary: Create job listing (authenticated)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, description, company_name, location, employment_type]
+              properties:
+                title: { type: string }
+                description: { type: string }
+                company_name: { type: string }
+                location: { type: string }
+                employment_type: { type: string, enum: [full_time, part_time, contract, remote] }
+                salary_min: { type: number }
+                salary_max: { type: number }
+                salary_currency: { type: string }
+                is_published: { type: boolean }
+                company_id: { type: integer, nullable: true }
+                skills:
+                  type: array
+                  items: { type: string }
+      responses:
+        '201':
+          description: Job listing created
+  /job-listings/{id}:
+    get:
+      summary: Get a single published job listing (public)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Job listing
+        '404':
+          description: Not found
+    put:
+      summary: Update job listing (owner only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                description: { type: string }
+                company_name: { type: string }
+                location: { type: string }
+                employment_type: { type: string }
+                salary_min: { type: number }
+                salary_max: { type: number }
+                is_published: { type: boolean }
+      responses:
+        '200':
+          description: Updated job listing
+    delete:
+      summary: Delete job listing (owner only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: Deleted
+  /salary-analytics:
+    get:
+      summary: Salary analytics (public, cached)
+      parameters:
+        - name: employment_type
+          in: query
+          schema: { type: string }
+        - name: location
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Overview and by_employment_type stats
+  /applications:
+    get:
+      summary: My applications (authenticated)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Paginated list
+    post:
+      summary: Apply to a job (authenticated)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [job_listing_id]
+              properties:
+                job_listing_id: { type: integer }
+                cover_letter: { type: string }
+                resume_path: { type: string }
+      responses:
+        '201':
+          description: Application created
+        '422':
+          description: Already applied or job not published
+  /applications/{id}:
+    get:
+      summary: Get application (applicant or listing owner)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Application details
+  /applications/{id}/status:
+    patch:
+      summary: Update application status (listing owner only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [pending, reviewed, shortlisted, rejected, hired] }
+      responses:
+        '200':
+          description: Updated application
+  /my/job-listings:
+    get:
+      summary: My job listings (authenticated)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Paginated list
+  /job-listings/{id}/applications:
+    get:
+      summary: Applications for a job listing (owner only)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Paginated list of applications
+  /companies/{slug}:
+    get:
+      summary: Public company profile by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Company profile
+  /companies:
+    post:
+      summary: Create company profile (company role, one per user)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                website: { type: string }
+                logo_url: { type: string }
+                industry: { type: string }
+                company_size: { type: string }
+                headquarters_location: { type: string }
+      responses:
+        '201':
+          description: Company created
+  /companies/me/profile:
+    get:
+      summary: My company profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Company
+        '404':
+          description: No profile
+    put:
+      summary: Update my company profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Updated
+  /me/saved-jobs:
+    get:
+      summary: Saved jobs (job seeker / admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Paginated job listings
+  /job-listings/{id}/save:
+    post:
+      summary: Save a published job
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '201':
+          description: Saved
+    delete:
+      summary: Remove saved job
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '204':
+          description: Removed
+  /me/profile/job-seeker:
+    get:
+      summary: Job seeker profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Profile
+    put:
+      summary: Create or update job seeker profile (skills, preferences)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Profile saved
+  /me/recommendations:
+    get:
+      summary: Recommended jobs (basic scoring from profile / application history)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: List of jobs
+  /notifications:
+    get:
+      summary: In-app notifications (database channel)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Paginated notifications
+  /notifications/{id}/read:
+    patch:
+      summary: Mark one notification read
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Updated
+  /notifications/read-all:
+    post:
+      summary: Mark all notifications read
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+  /admin/users:
+    get:
+      summary: List users (admin only)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Paginated users

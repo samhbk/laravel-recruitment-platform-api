@@ -1,0 +1,64 @@
+name: Bug report
+description: Report incorrect API behavior, validation, or authorization issues
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Do **not** paste real JWT tokens, `.env` contents, or production credentials.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Clear description of the bug.
+      placeholder: e.g. Employer can PATCH application status for another company's listing.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. `php artisan migrate --seed`
+        2. Login as employer@example.com
+        3. PATCH /api/v1/applications/{id}/status with …
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: PHP / Laravel version
+      placeholder: e.g. PHP 8.3, Laravel 12.x
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      options:
+        - Local (SQLite)
+        - Local (MySQL/PostgreSQL)
+        - Docker Compose
+        - GitHub Actions CI
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Response body, logs, or screenshots
+      description: HTTP status, JSON error, or `storage/logs` excerpt. Redact secrets.
+    validations:
+      required: false

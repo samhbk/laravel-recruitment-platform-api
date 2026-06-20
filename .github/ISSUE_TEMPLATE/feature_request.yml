@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an improvement within project scope
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This repo is a portfolio **Laravel recruitment / ATS API**. Large scope changes may be declined — discuss first for net-new product areas.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What user or engineering problem would this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Endpoint, data model, or architectural approach. Keep it concrete.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: Fits existing domains (auth, jobs, applications, profiles, notifications)
+          required: false
+        - label: Includes OpenAPI / test updates in the PR
+          required: false
+        - label: I am willing to contribute a PR
+          required: false
