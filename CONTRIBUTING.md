@@ -7,7 +7,7 @@ Thank you for your interest in this project. It is a **portfolio reference API**
 1. Read the [README](README.md) for scope and architecture.
 2. API and RBAC details: [docs/api.md](docs/api.md), [docs/auth-and-rbac.md](docs/auth-and-rbac.md).
 3. Check existing [issues](https://github.com/sameh-bakleh/laravel-recruitment-platform-api/issues) to avoid duplicate work.
-3. For security issues, follow [SECURITY.md](SECURITY.md) — **do not** open public issues with exploit details.
+4. For security issues, follow [SECURITY.md](SECURITY.md) — **do not** open public issues with exploit details.
 
 ## Local setup
 

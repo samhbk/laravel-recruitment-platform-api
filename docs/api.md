@@ -52,8 +52,8 @@ Obtain a token via `POST /auth/register` or `POST /auth/login`. Refresh with `PO
 {
   "name": "Jane Doe",
   "email": "jane@example.com",
-  "password": "password123",
-  "password_confirmation": "password123",
+  "password": "password",
+  "password_confirmation": "password",
   "role": "job_seeker"
 }
 ```

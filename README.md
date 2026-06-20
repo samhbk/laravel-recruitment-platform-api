@@ -5,6 +5,11 @@
 ![Laravel 12](https://img.shields.io/badge/Laravel-12-FF2D20?logo=laravel&logoColor=white)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green)
 
+| | |
+|---|---|
+| **Repo** | [`laravel-recruitment-platform-api`](https://github.com/sameh-bakleh/laravel-recruitment-platform-api) |
+| **Stack** | Laravel 12 · PHP 8.3 · JWT · MySQL · Redis · OpenAPI · Docker |
+
 **ATS-style recruitment backend** — JWT auth, RBAC, versioned REST API, employer application workflows, Redis caching, queued notifications, OpenAPI contract, Docker, and 45 PHPUnit tests in CI.
 
 > **30-second summary for recruiters:** Production-style Laravel API for a job portal / applicant tracking system. Demonstrates layered architecture (Actions, repositories, policies), secure multi-role access, validated HTTP boundaries, and automated tests — not a tutorial CRUD app. Synthetic demo data only; no real users or credentials.
@@ -163,7 +168,7 @@ sequenceDiagram
     N-->>Client: 201 + ApplicationResource
 ```
 
-**Conscious trade-offs:** Recommendations use in-memory scoring (no ML). Job search is SQL-based (Elasticsearch noted as extension point in code). `resume_path` is a string field — no file upload pipeline.
+**Conscious trade-offs:** Recommendations use in-memory scoring (no ML). Job search is SQL-based — Elasticsearch would be a natural extension for full-text search at scale. `resume_path` is a string field — no file upload pipeline.
 
 ---
 
@@ -356,8 +361,6 @@ GitHub Actions (`.github/workflows/ci.yml`) on every push/PR to `main` / `master
 1. **Install** — `composer install` (with dependency cache)
 2. **Lint** — `./vendor/bin/pint --test`
 3. **Test** — `php artisan test` on PHP 8.3 + SQLite
-
-[![CI](https://github.com/sameh-bakleh/laravel-recruitment-platform-api/actions/workflows/ci.yml/badge.svg)](https://github.com/sameh-bakleh/laravel-recruitment-platform-api/actions/workflows/ci.yml)
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for local checks before opening a PR.
 
